@@ -10,11 +10,12 @@ namespace AsteriskConnector
 {
     public partial class Connector : Form
     {
-        private ManagerConnection Manager;
-        private string Host = string.Empty;
-        private int Port = 0;
-        private string LoginName = string.Empty;
-        private string Password = string.Empty;
+        private ManagerConnection manager;
+        private string host = string.Empty;
+        private int port = 0;
+        private string loginName = string.Empty;
+        private string password = string.Empty;
+        private string callerName = string.Empty;
 
         public Connector()
         {
@@ -27,62 +28,58 @@ namespace AsteriskConnector
 
             if (!string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["Host"]))
             {
-                Host = ConfigurationManager.AppSettings["Host"];
+                host = ConfigurationManager.AppSettings["Host"];
             }
 
             if (!string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["Port"]))
             {
-                Port = int.Parse(ConfigurationManager.AppSettings["Port"]);
+                port = int.Parse(ConfigurationManager.AppSettings["Port"]);
             }
 
             if (!string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["Login"]))
             {
-                LoginName = ConfigurationManager.AppSettings["Login"];
+                loginName = ConfigurationManager.AppSettings["Login"];
             }
 
             if (!string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["Password"]))
             {
-                Password = ConfigurationManager.AppSettings["Password"];
+                password = ConfigurationManager.AppSettings["Password"];
             }
 
-            TextBoxHost.Text = Host;
-            NumericUpDownPort.Value = Port;
-            TextBoxLogin.Text = LoginName;
-            TextBoxPassword.Text = Password;
+            TextBoxHost.Text = host;
+            NumericUpDownPort.Value = port;
+            TextBoxLogin.Text = loginName;
+            TextBoxPassword.Text = password;
         }
 
         private void ButtonConnect_Click(object sender, EventArgs e)
         {
-            Manager = new ManagerConnection(Host, Port, LoginName, Password);
-            Manager.FireAllEvents = true;
-            Manager.PingInterval = 0;
+            manager = new ManagerConnection(host, port, loginName, password);
+            manager.FireAllEvents = true;
+            manager.PingInterval = 0;
             
-            Manager.UnhandledEvent += UnhandledEvent;
-            Manager.Hangup += Hangup;
-            Manager.NewState += NewState;
-            Manager.PeerlistComplete += PeerlistComplete;
+            manager.UnhandledEvent += UnhandledEvent;
+            manager.Hangup += Hangup;
+            manager.NewState += NewState;
 
             try
             {
-                Manager.Login();
+                manager.Login();
                 GroupBoxCall.Enabled = true;
                 GroupBoxCommand.Enabled = true;
                 GroupBoxState.Enabled = true;
-                TextBoxOutput.Text += "-----Connected-----" + Environment.NewLine + 
-                    "Asterisk version : " + Manager.Version + Environment.NewLine + Environment.NewLine;
+                TextBoxOutput.Text += "-----Connected-----" + Environment.NewLine + "Asterisk version : " + manager.Version + Environment.NewLine + Environment.NewLine;
             }
             catch (Exception ex)
             {
                 GroupBoxCall.Enabled = false;
                 GroupBoxCommand.Enabled = false;
                 GroupBoxState.Enabled = false;
-                TextBoxOutput.Text += "-----Not connected-----" + Environment.NewLine +
-                    ex.Message + Environment.NewLine + Environment.NewLine;
+                TextBoxOutput.Text += "-----Not connected-----" + Environment.NewLine + ex.Message + Environment.NewLine + Environment.NewLine;
             }
             
         }
 
-        string callerName;
         private void NewState(object sender, NewStateEvent e)
         {
             TextBoxOutput.Text += "-----State event detected-----" + Environment.NewLine +
@@ -95,10 +92,6 @@ namespace AsteriskConnector
                 callerName = e.Channel;
                 ButtonDecline.Enabled = true;
             }
-        }
-
-        private void PeerlistComplete(object sender, PeerlistCompleteEvent e)
-        {
         }
 
         private void Hangup(object sender, HangupEvent e)
@@ -132,10 +125,9 @@ namespace AsteriskConnector
                 originateAction.Priority = "1";
                 originateAction.Timeout = 30000;
                 originateAction.Async = true;
-                var originateResponse = Manager.SendAction(originateAction);
+                var originateResponse = manager.SendAction(originateAction);
 
-                TextBoxOutput.Text += "-----Originating call-----" + Environment.NewLine + 
-                    "from " + from + " to " + to + Environment.NewLine + Environment.NewLine;
+                TextBoxOutput.Text += "-----Originating call-----" + Environment.NewLine + "from " + from + " to " + to + Environment.NewLine + Environment.NewLine;
             }
             else
             {
@@ -167,7 +159,7 @@ namespace AsteriskConnector
             {
                 var result = string.Empty;
                 TextBoxOutput.Text += "-----Executed '" + commandText + "' command -----" + Environment.NewLine;
-                response = (CommandResponse)Manager.SendAction(command);
+                response = (CommandResponse)manager.SendAction(command);
                 foreach (var line in response.Result)
                 {
                     result += line + Environment.NewLine;
@@ -198,7 +190,7 @@ namespace AsteriskConnector
         {
             var hangupAction = new HangupAction();
             hangupAction.Channel = callerName;
-            var hangupResponse = Manager.SendAction(hangupAction);
+            var hangupResponse = manager.SendAction(hangupAction);
         }
 
         private void ComboBoxCommand_KeyPress(object sender, KeyPressEventArgs e)
@@ -217,7 +209,7 @@ namespace AsteriskConnector
                 var get = new DBGetAction();
                 get.Family = "DND";
                 get.Key = number;
-                var res = Manager.SendAction(get);
+                var res = manager.SendAction(get);
                 if (res.Response == "Error")
                 {
                     MessageBox.Show(number + " is active", "Extension state");
@@ -238,7 +230,7 @@ namespace AsteriskConnector
                 put.Family = "DND";
                 put.Key = number;
                 put.Val = "YES";
-                var response = Manager.SendAction(put);
+                var response = manager.SendAction(put);
             }
         }
 
@@ -250,7 +242,7 @@ namespace AsteriskConnector
                 var delete = new DBDelAction();
                 delete.Family = "DND";
                 delete.Key = number;
-                var response = Manager.SendAction(delete);
+                var response = manager.SendAction(delete);
             }
         }
     }

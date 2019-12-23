@@ -358,7 +358,7 @@
             this.GroupBoxState.Size = new System.Drawing.Size(343, 50);
             this.GroupBoxState.TabIndex = 21;
             this.GroupBoxState.TabStop = false;
-            this.GroupBoxState.Text = "Do not desturb";
+            this.GroupBoxState.Text = "Do not disturb";
             // 
             // ButtonDNDOn
             // 
