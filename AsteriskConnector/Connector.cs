@@ -11,10 +11,6 @@ namespace AsteriskConnector
     public partial class Connector : Form
     {
         private ManagerConnection manager;
-        private string host = string.Empty;
-        private int port = 0;
-        private string loginName = string.Empty;
-        private string password = string.Empty;
         private string callerName = string.Empty;
 
         public Connector()
@@ -28,36 +24,31 @@ namespace AsteriskConnector
 
             if (!string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["Host"]))
             {
-                host = ConfigurationManager.AppSettings["Host"];
+                TextBoxHost.Text = ConfigurationManager.AppSettings["Host"];
             }
 
             if (!string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["Port"]))
             {
-                port = int.Parse(ConfigurationManager.AppSettings["Port"]);
+                NumericUpDownPort.Value = int.Parse(ConfigurationManager.AppSettings["Port"]);
             }
 
             if (!string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["Login"]))
             {
-                loginName = ConfigurationManager.AppSettings["Login"];
+                TextBoxLogin.Text = ConfigurationManager.AppSettings["Login"];
             }
 
             if (!string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["Password"]))
             {
-                password = ConfigurationManager.AppSettings["Password"];
+                TextBoxPassword.Text = ConfigurationManager.AppSettings["Password"];
             }
-
-            TextBoxHost.Text = host;
-            NumericUpDownPort.Value = port;
-            TextBoxLogin.Text = loginName;
-            TextBoxPassword.Text = password;
         }
 
         private void ButtonConnect_Click(object sender, EventArgs e)
         {
-            manager = new ManagerConnection(host, port, loginName, password);
+            manager = new ManagerConnection(TextBoxHost.Text, (int)NumericUpDownPort.Value, TextBoxLogin.Text, TextBoxPassword.Text);
             manager.FireAllEvents = true;
             manager.PingInterval = 0;
-            
+
             manager.UnhandledEvent += UnhandledEvent;
             manager.Hangup += Hangup;
             manager.NewState += NewState;

@@ -327,7 +327,8 @@
             "sip show registry",
             "sip show subscriptions",
             "sip show users",
-            "manager show users"});
+            "manager show users",
+            "database show"});
             this.ComboBoxCommand.Location = new System.Drawing.Point(14, 19);
             this.ComboBoxCommand.Name = "ComboBoxCommand";
             this.ComboBoxCommand.Size = new System.Drawing.Size(188, 21);
